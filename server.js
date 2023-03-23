@@ -85,8 +85,7 @@ router.post('/signin', function (req, res) {
 });
 
 router.route('/movies')
-
-        // getting a movie
+    // getting a movie
     .get(authJwtController.isAuthenticated, function (req, res) {
         if (req.query && req.query.reviews && req.query.reviews === "true") {
             Movie.findOne({title: req.params.title}, function (err, movies) {
@@ -104,8 +103,11 @@ router.route('/movies')
                         })
                 }
             })
+        } else {
+            res.json({ message: 'No reviews found for this movie.' });
         }
     })
+
 
     .post(authJwtController.isAuthenticated, function (req, res) {
     if (!req.body.title || !req.body.genre || !req.body.releaseYear || !req.body.actors) {
