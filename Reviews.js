@@ -1,12 +1,30 @@
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 
-mongoose.connect(process.env.DB);
+mongoose.Promise = global.Promise;
 
-// Movie schema
 var ReviewSchema = new Schema({
-
+    ReviewerName: {
+        type: String,
+        required: true,
+        trim: true
+    },
+    Quote: {
+        type: String,
+        required: true,
+        trim: true
+    },
+    Rating: {
+        type: Number,
+        required: true,
+        trim: true
+    },
+    MovieName: {
+        type: String,
+        required: true,
+        trim: true
+    }
 });
 
-// return the model
+
 module.exports = mongoose.model('Review', ReviewSchema);
