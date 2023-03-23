@@ -88,22 +88,28 @@ router.route('/movies')
     // getting a movie
     .get(authJwtController.isAuthenticated, function (req, res) {
         if (req.query.reviews === "true") {
-            Movie.findOne({title: req.params.title}, function (err, movies) {
+            Movie.aggregate()
+                .match({title: req.query.title})
+                .lookup({from: 'reviews', localField: 'title', foreignField: 'title', as: 'reviews'})
+                .addFields({avgRating: {$avg: "$reviews.rating"}})
+                .exec(function (err, movies) {
+                    if (err) {
+                        res.status(500).send(err);
+                    } else if (movies.length === 0) {
+                        res.status(404).json({ message: 'No reviews found for this movie.' });
+                    } else {
+                        res.json(movies[0]);
+                    }
+                })
+        } else {
+            Movie.findOne({title: req.query.title}, function (err, movie) {
                 if (err)  throw err;
-                else {
-                    Movie.aggregate()
-                        .lookup({from: 'reviews', localField: 'title', foreignField: 'title', as: 'reviews'})
-                        .exec(function (err, movies) {
-                            if (err) {
-                                res.status(500).send(err);
-                            } else {
-                                res.json(movies);
-                            }
-                        })
+                else if (!movie) {
+                    res.status(404).json({ message: 'Movie not found.' });
+                } else {
+                    res.json(movie);
                 }
             })
-        } else {
-            res.json({ message: 'No reviews found for this movie.' });
         }
     })
 
