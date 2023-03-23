@@ -105,7 +105,7 @@ router.route('/movies')
                 }
             })
         }
-    });
+    })
 
     .post(authJwtController.isAuthenticated, function (req, res) {
     if (!req.body.title || !req.body.genre || !req.body.releaseYear || !req.body.actors) {
