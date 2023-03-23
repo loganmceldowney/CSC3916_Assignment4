@@ -1,5 +1,6 @@
 
-
+let envPath = __dirname + "/.env"
+require('dotenv').config({path:envPath});
 var express = require('express');
 var bodyParser = require('body-parser');
 var passport = require('passport');
@@ -10,6 +11,7 @@ var cors = require('cors');
 var User = require('./Users');
 var Review = require('./Reviews');
 var Movie = require('./Movies');
+
 var app = express();
 app.use(cors());
 app.use(bodyParser.json());
