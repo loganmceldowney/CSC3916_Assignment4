@@ -1,31 +1,26 @@
-require('dotenv').config();
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
+var bcrypt = require('bcrypt-nodejs');
 
 mongoose.Promise = global.Promise;
 
-// movie schema, all fields are required and actors is an array of strings
+try {
+    mongoose.connect( process.env.DB, {useNewUrlParser: true, useUnifiedTopology: true}, () =>
+        console.log("connected"));
+}catch (error) {
+    console.log("could not connect");
+}
+mongoose.set('useCreateIndex', true);
+
+// movies schema
 var MovieSchema = new Schema({
-    Title: {
-        type: String,
-        required: true,
-        index: {
-            unique: true
-        },
-        trim: true
-    },
-    YearReleased: {
-        type: Number,
-        required: true,
-        trim: true
-    },
-    Genre: {
-        type: String,
-        required: true,
-        trim: true
-    },
-    Actors: {type: Array, default: []}
+    title: {type: String, required: true},
+    year: {type: String, required: true},
+    genre: {type: String, required: true, enum:['Action', 'Adventure',  'Comedy',  'Drama',  'Fantasy',  'Horror',  'Mystery',  'Thriller', 'Western'] },
+    actors: {type: Array, required: true, items: {actorName: String, characterName: String}, minItems: 3},
+    imageURL: {type: String, required: true}
+
 });
 
-
+// return the model to server
 module.exports = mongoose.model('Movie', MovieSchema);
