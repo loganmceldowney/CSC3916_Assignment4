@@ -1,12 +1,31 @@
+require('dotenv').config();
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 
-mongoose.connect(process.env.DB);
+mongoose.Promise = global.Promise;
 
-// Movie schema
+// movie schema, all fields are required and actors is an array of strings
 var MovieSchema = new Schema({
-
+    Title: {
+        type: String,
+        required: true,
+        index: {
+            unique: true
+        },
+        trim: true
+    },
+    YearReleased: {
+        type: Number,
+        required: true,
+        trim: true
+    },
+    Genre: {
+        type: String,
+        required: true,
+        trim: true
+    },
+    Actors: {type: Array, default: []}
 });
 
-// return the model
+
 module.exports = mongoose.model('Movie', MovieSchema);
