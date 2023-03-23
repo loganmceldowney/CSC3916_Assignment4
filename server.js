@@ -93,7 +93,6 @@ router.route('/movies')
                 else {
                     Movie.aggregate()
                         .lookup({from: 'reviews', localField: 'title', foreignField: 'title', as: 'reviews'})
-                        .addFields({avgRating: {$avg: "$reviews.rating"}})
                         .exec(function (err, movies) {
                             if (err) {
                                 res.status(500).send(err);
