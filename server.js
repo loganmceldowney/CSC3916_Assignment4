@@ -84,88 +84,9 @@ router.post('/signin', function (req, res) {
     })
 });
 
-// movie routes
 router.route('/movies')
-    // saving a movie
-    .post(authJwtController.isAuthenticated, function (req, res) {
-        //console.log(req.body);
-        if (!req.body.title || !req.body.year || !req.body.genre || !req.body.actors || req.body.actors < 3) {
-            res.json({success: false, message: "An input should contain: Title, year released, Genre, and 3 Actors"});
-        } else {
-            
-            var movie = new Movie();
 
-            movie.title = req.body.title;
-            movie.year = req.body.year;
-            movie.genre = req.body.genre;
-            movie.actors = req.body.actors;
-            movie.imageURL = req.body.imageURL;
-
-            movie.save(function(err){
-                
-            if (err) {
-                return res.json(err);
-                }
-            res.json({success: true, msg: 'Movie was saved successfuly.'});
-            })
-            
-        }
-    })
-
-    // updating a movie
-    .put(authJwtController.isAuthenticated, function(req, res) {
-        if(!req.body.title){
-            res.json({success:false, message: "Title is required."});
-        }else{      // data provided
-            if (req.body.newTitle){    
-                Movie.findOneAndUpdate(req.body.title, req.body.newTitle, function(err, movie) {
-                    if(err){
-                        res.status(403).json({success:false, message: "Error: Could not make a change."});
-                    }else{
-                        res.status(200).json({success: true, message: "Title has been updated successfully"});
-                    }
-                });
-            }
-            if (req.body.newYear){    
-                Movie.findOneAndUpdate(req.body.year, req.body.newYear, function(err, movie) {
-                    if(err){
-                        res.status(403).json({success:false, message: "Error: Could not make a change."});
-                    }else{
-                        res.status(200).json({success: true, message: "Released year has been updated successfully"});
-                    }
-                });
-            }
-            if (req.body.newGenre){    
-                Movie.findOneAndUpdate(req.body.genre, req.body.newGenre, function(err, movie) {
-                    if(err){
-                        res.status(403).json({success:false, message: "Error: Could not make a change."});
-                    }else{
-                        res.status(200).json({success: true, message: "Genre has been updated successfully"});
-                    }
-                });
-            }
-        }
-    })
-
-    // deleting a movie
-    .delete(authJwtController.isAuthenticated, function(req, res) {
-        if(!req.body.title){
-            res.json({success:false, message: "Please provide a title to delete"});
-        }else{
-            Movie.findOneAndDelete(req.body.title, function(err, movie) {
-                if(err){
-                    res.status(403).json({success:false, message: "Error: Could not delete this movie"});
-                }else if(!movie){
-                    res.status(403).json({success: false, message: "Error: No movie matches this movie, does not exist."});
-                }else {
-                    res.status(200).json({success: true, message: "Movie was deleted successfuly"});
-                }
-             })
-         }
-
-    })
-
-    // getting a movie
+        // getting a movie
     .get(authJwtController.isAuthenticated, function (req, res) {
         if (req.query && req.query.reviews && req.query.reviews === "true") {
             Movie.findOne({title: req.params.title}, function (err, movies) {
@@ -183,6 +104,77 @@ router.route('/movies')
                         })
                 }
             })
+        }
+    });
+
+    .post(authJwtController.isAuthenticated, function (req, res) {
+    if (!req.body.title || !req.body.genre || !req.body.releaseYear || !req.body.actors) {
+        res.json({success: false, msg: 'Please pass in all 4 required criteria in order to save a movie!'});
+    } else {
+        if (req.body.actors.length < 3) {
+            res.json({ success: false, message: 'Please include at least three actors.' });
+        } else {
+            // Check if movie already exists
+            Movie.findOne({ title: req.body.title }, function (err, existingMovie) {
+                if (err) {
+                    return res.send(err);
+                }
+                if (existingMovie) {
+                    return res.json({ success: false, message: 'A movie with that title already exists.' });
+                }
+                // Save the movie
+                var movie = new Movie();
+                movie.title = req.body.title;
+                movie.releaseYear = req.body.releaseYear;
+                movie.genre = req.body.genre;
+                movie.actors = req.body.actors;
+
+                movie.save(function (err) {
+                    if (err) {
+                        return res.send(err);
+                    }
+                    res.json({ message: 'Movie has been successfully created.' });
+                });
+            });
+        }
+    }
+})
+
+
+    //Update movies
+    .put(authJwtController.isAuthenticated, function(req, res) {
+        if (!req.params.movieTitle) {
+            res.json({success: false, msg: 'Please pass a Movie Title to update.'});
+        } else {
+            Movie.findOne({title: req.params.movieTitle}, function (err, movie) {
+                if (err) throw err;
+                else {
+                    movie.releaseYear = req.body.releaseYear || movie.releaseYear;
+                    movie.genre = req.body.genre || movie.genre;
+                    movie.actors = req.body.actors || movie.actors;
+     
+                    movie.save(function (err) {
+                        if (err) throw err;
+     
+                        res.json({success: true, msg: 'Movie has been successfully updated.'});
+                    })
+                }
+            })
+        }
+     })
+
+    //delete a movie
+    .delete(authJwtController.isAuthenticated, function(req, res) {
+        if (!req.body.title) {
+            res.json({success: false, msg: 'Please input the an existing movie title to delete.'});
+        }
+        else {
+            Movie.findOneAndRemove({title: req.body.title}, function (err) {
+                if (err) throw err;
+                res.json({success: true, msg: 'Movie has been successfully deleted.'});
+            })
+                //}
+            //})
         }
     });
 
